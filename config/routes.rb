@@ -1,4 +1,16 @@
 Twitter::Application.routes.draw do
+  get "sessions/new"
+
+  get "sessions/create"
+
+  get "sessions/destroy"
+ 
+  get "sessions/callback", :to => "sessions#callback", :as => "callback"
+
+  root :to => 'sessions#new'
+
+  
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
