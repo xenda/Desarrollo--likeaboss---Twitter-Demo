@@ -36,7 +36,7 @@ end
     secret = APP_CONFIG[:twitter][:consumer_secret]
     params = {
     :site => "http://api.twitter.com",
-    :request_endpoint => "http://app.twitter.com",
+    :request_endpoint => "http://api.twitter.com",
     :sign_in => true
     }
 
