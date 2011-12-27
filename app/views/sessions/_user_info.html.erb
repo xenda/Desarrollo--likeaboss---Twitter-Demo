@@ -1,0 +1,16 @@
+<div style="background: #FFF url('<%= @user.profile_background_image_url %>') !important; padding: 20px">
+
+  <div style="background:#FFF; padding: 20px;">
+  
+    <%= @user.screen_name %> Tiene <%= @user.followers %> seguidores.
+    <ul>
+      <% Twitter.friend_ids(@user.screen_name).collection[0..10].each do |f| %>
+        <li><%= Twitter.user(f).screen_name %></li>
+      <% end %>
+    </ul>
+
+  </div>
+
+</div>
+
+<%= link_to "Logout", logout_path %>

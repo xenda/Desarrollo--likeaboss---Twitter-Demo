@@ -1,9 +1,9 @@
 Twitter::Application.routes.draw do
   get "sessions/new"
 
-  get "sessions/create"
+  get "sessions/create", :as => "login"
 
-  get "sessions/destroy"
+  get "sessions/destroy", :as => "logout"
  
   get "sessions/callback", :to => "sessions#callback", :as => "callback"
 

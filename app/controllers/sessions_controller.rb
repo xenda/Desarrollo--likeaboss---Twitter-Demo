@@ -1,46 +1,50 @@
+require 'oauth_request'
+
 class SessionsController < ApplicationController
 
-  include Twitter::AuthenticationHelpers
-
   def new
+    @user = client.verify_credentials if session[:access_token]
   end
 
   def create
-    logger.info callback_url
-    request = oauth_consumer.get_request_token(:oauth_callback => callback_url )
-    session[:request_token] = request.token
-    session[:request_secret] = request.secret
-    redirect_to request.authorize_url
+    request = OAuthRequest.new(:callback_url => callback_url)
+    request_token = request.get_token
+
+    session[:request_token] = request_token.token
+    session[:request_secret] = request_token.secret
+
+    redirect_to request_token.authorize_url
   end
 
   def destroy
+    session[:access_token]  = nil
+    session[:access_secret] = nil
+    redirect_to root_path
   end
 
   def callback
-    o = oauth_consumer
-    t = session[:request_token]
-    s = session[:request_secret]   
-    request = OAuth::RequestToken.new(o,t,s)
-    access_token = request.get_access_token(:oauth_verifier => params[:oauth_verifier])
-    session[:access_token] = access_token.token
-    session[:access_secret] = access_token.secret
-    user = client.verify_credentials
-    sign_in(user)
-    redirect_back_or root_path  
+
+    token_params = {
+      :token  => session[:request_token],
+      :secret => session[:request_secret]    
+    }.merge! params
+
+    request  = OAuthRequest.new
+    access   = request.validate_token(token_params)
+
+    session[:access_token] = access.token
+    session[:access_secret] = access.secret
+
+    @user = client.verify_credentials
+    sign_in(@user)
+    redirect_to root_path 
+     
 end
 
   private
 
-  def oauth_consumer
-    key = APP_CONFIG[:twitter][:consumer_key]
-    secret = APP_CONFIG[:twitter][:consumer_secret]
-    params = {
-    :site => "http://api.twitter.com",
-    :request_endpoint => "http://api.twitter.com",
-    :sign_in => true
-    }
-
-    @oauth_consumer ||= OAuth::Consumer.new(key, secret, params)
+  def sign_in(user)
+    session[:screen_name] = user.screen_name if user
   end
 
   def client
